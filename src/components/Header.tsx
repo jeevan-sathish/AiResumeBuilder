@@ -48,12 +48,20 @@ const Header = () => {
             Home
           </Link>
           <Link
+            to="/build-resume"
+            className={`transition-all duration-300 hover:text-primary ${
+              location.pathname === "/build-resume" ? "text-primary font-medium" : ""
+            }`}
+          >
+            Build Resume
+          </Link>
+          <Link
             to="/builder"
             className={`transition-all duration-300 hover:text-primary ${
               location.pathname === "/builder" ? "text-primary font-medium" : ""
             }`}
           >
-            Build Resume
+            AI Assistant
           </Link>
           <ThemeToggle />
         </div>
@@ -84,13 +92,22 @@ const Header = () => {
               Home
             </Link>
             <Link
+              to="/build-resume"
+              className={`transition-all duration-300 hover:text-primary ${
+                location.pathname === "/build-resume" ? "text-primary font-medium" : ""
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Build Resume
+            </Link>
+            <Link
               to="/builder"
               className={`transition-all duration-300 hover:text-primary ${
                 location.pathname === "/builder" ? "text-primary font-medium" : ""
               }`}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Build Resume
+              AI Assistant
             </Link>
           </div>
         </div>
