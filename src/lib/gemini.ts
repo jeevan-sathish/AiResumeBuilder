@@ -12,7 +12,8 @@ type GeminiResponse = {
 export async function getGeminiResponse(prompt: string): Promise<string> {
   try {
     const API_KEY = "AIzaSyDfre4670HNfsJcpQe039hdZ43roymvbag";
-    const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    // Updated API URL for free version
+    const API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
     
     const response = await fetch(`${API_URL}?key=${API_KEY}`, {
       method: "POST",

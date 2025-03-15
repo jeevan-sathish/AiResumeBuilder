@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import ChatInterface from "./ChatInterface";
@@ -34,16 +33,30 @@ const ResumeBuilder = () => {
       setUserName(storedName);
     }
     
-    // Check if we have resume data from the form
     if (location.state?.resumeData) {
-      // Handle resume data from form
-      console.log("Resume data received:", location.state.resumeData);
+      const { fullName, email, phone, location: userLocation, summary, workExperience, education, skills, certifications, languages, projects } = location.state.resumeData;
+      
+      let formattedContent = "";
+      
+      if (fullName) formattedContent += `# ${fullName}\n`;
+      if (email || phone || userLocation) {
+        formattedContent += `${email || ''} | ${phone || ''} | ${userLocation || ''}\n\n`;
+      }
+      
+      if (summary) formattedContent += `## Professional Summary\n${summary}\n\n`;
+      if (workExperience) formattedContent += `## Work Experience\n${workExperience}\n\n`;
+      if (education) formattedContent += `## Education\n${education}\n\n`;
+      if (skills) formattedContent += `## Skills\n${skills}\n\n`;
+      if (projects) formattedContent += `## Projects\n${projects}\n\n`;
+      if (certifications) formattedContent += `## Certifications\n${certifications}\n\n`;
+      if (languages) formattedContent += `## Languages\n${languages}\n\n`;
+      
+      setResumeContent(formattedContent);
       
       if (location.state.layout) {
         setSelectedLayout(location.state.layout);
       }
       
-      // If analyze flag is set, trigger analysis
       if (location.state.analyze) {
         analyzeResume();
       }
@@ -54,17 +67,22 @@ const ResumeBuilder = () => {
     setIsAnalyzing(true);
     
     try {
-      // For a real implementation, we would analyze the actual resume content
-      // Here we'll generate random scores for demonstration
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const resumeData = location.state?.resumeData || {};
       
-      // Generate new random scores
+      const contentScores = {
+        atsScore: calculateATSScore(resumeData),
+        contentQualityScore: calculateContentQualityScore(resumeData),
+        keywordScore: calculateKeywordScore(resumeData),
+        formatScore: 90,
+        impactScore: calculateImpactScore(resumeData)
+      };
+      
       const newStrengths = [
-        { category: "ATS Compatibility", score: Math.floor(Math.random() * 15) + 80 },
-        { category: "Content Quality", score: Math.floor(Math.random() * 20) + 75 },
-        { category: "Keyword Optimization", score: Math.floor(Math.random() * 25) + 70 },
-        { category: "Format & Structure", score: Math.floor(Math.random() * 15) + 80 },
-        { category: "Impact Statements", score: Math.floor(Math.random() * 20) + 75 },
+        { category: "ATS Compatibility", score: contentScores.atsScore },
+        { category: "Content Quality", score: contentScores.contentQualityScore },
+        { category: "Keyword Optimization", score: contentScores.keywordScore },
+        { category: "Format & Structure", score: contentScores.formatScore },
+        { category: "Impact Statements", score: contentScores.impactScore },
       ];
       
       setStrengths(newStrengths);
@@ -84,20 +102,133 @@ const ResumeBuilder = () => {
     }
   };
 
-  const downloadResume = () => {
-    // This is a simplified demo - in a real app, we'd generate a PDF
-    toast({
-      title: "Download Started",
-      description: "Your resume is being downloaded as a PDF.",
-    });
+  const calculateATSScore = (data: any) => {
+    let score = 70;
     
-    // Simulate download delay
-    setTimeout(() => {
-      toast({
-        title: "Download Complete",
-        description: "Your resume has been successfully downloaded.",
+    if (data.summary && data.summary.length > 50) score += 5;
+    if (data.workExperience && data.workExperience.length > 100) score += 5;
+    if (data.skills && data.skills.length > 50) score += 5;
+    if (data.education && data.education.length > 50) score += 5;
+    if (data.projects && data.projects.length > 0) score += 5;
+    if (data.certifications && data.certifications.length > 0) score += 3;
+    if (data.languages && data.languages.length > 0) score += 2;
+    
+    return Math.min(score, 98);
+  };
+  
+  const calculateContentQualityScore = (data: any) => {
+    let score = 65;
+    
+    if (data.summary && data.summary.length > 100) score += 7;
+    if (data.workExperience && data.workExperience.length > 200) score += 7;
+    if (data.skills && data.skills.length > 100) score += 7;
+    if (data.education && data.education.length > 100) score += 7;
+    
+    return Math.min(score, 95);
+  };
+  
+  const calculateKeywordScore = (data: any) => {
+    let score = 60;
+    
+    if (data.skills) {
+      const skills = data.skills.toLowerCase();
+      if (skills.includes("management") || skills.includes("leadership")) score += 5;
+      if (skills.includes("communication")) score += 5;
+      if (skills.includes("analy")) score += 5;
+      if (skills.includes("project")) score += 5;
+      if (skills.includes("team")) score += 5;
+      if (skills.includes("develop")) score += 5;
+    }
+    
+    return Math.min(score, 90);
+  };
+  
+  const calculateImpactScore = (data: any) => {
+    let score = 70;
+    
+    if (data.workExperience) {
+      const exp = data.workExperience.toLowerCase();
+      if (exp.includes("increas") || exp.includes("improv")) score += 3;
+      if (exp.includes("lead") || exp.includes("manage")) score += 3;
+      if (exp.includes("develop") || exp.includes("creat")) score += 3;
+      if (exp.includes("implement")) score += 3;
+      if (exp.includes("%") || exp.includes("percent")) score += 3;
+    }
+    
+    return Math.min(score, 92);
+  };
+
+  const downloadResume = () => {
+    let content = "";
+    
+    if (resumeContent) {
+      content = resumeContent;
+    } else if (location.state?.resumeData) {
+      const { fullName, email, phone, location: userLocation, summary, workExperience, education, skills, certifications, languages, projects } = location.state.resumeData;
+      
+      content = `# ${fullName || "Resume"}\n`;
+      if (email || phone || userLocation) {
+        content += `${email || ''} | ${phone || ''} | ${userLocation || ''}\n\n`;
+      }
+      
+      if (summary) content += `## Professional Summary\n${summary}\n\n`;
+      if (workExperience) content += `## Work Experience\n${workExperience}\n\n`;
+      if (education) content += `## Education\n${education}\n\n`;
+      if (skills) content += `## Skills\n${skills}\n\n`;
+      if (projects) content += `## Projects\n${projects}\n\n`;
+      if (certifications) content += `## Certifications\n${certifications}\n\n`;
+      if (languages) content += `## Languages\n${languages}\n\n`;
+    } else {
+      content = "# Sample Resume\n\n## Professional Summary\nExperienced professional with expertise in...\n\n## Work Experience\n...\n\n## Education\n...\n\n## Skills\n...";
+    }
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'resume.txt';
+    document.body.appendChild(link);
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Download Complete",
+      description: "Your resume has been successfully downloaded.",
+    });
+  };
+
+  const shareResume = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Resume',
+        text: 'Check out my resume created with GrabYourFuture!',
+        url: window.location.href,
+      })
+      .then(() => {
+        toast({
+          title: "Resume Shared",
+          description: "Your resume has been shared successfully.",
+        });
+      })
+      .catch((error) => {
+        console.error('Error sharing resume:', error);
+        toast({
+          title: "Sharing Failed",
+          description: "There was an error sharing your resume. Please try again.",
+          variant: "destructive",
+        });
       });
-    }, 1500);
+    } else {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        toast({
+          title: "Link Copied",
+          description: "Resume link copied to clipboard. You can now share it manually.",
+        });
+      });
+    }
   };
 
   const handlePromptResult = (result: string) => {
@@ -123,7 +254,6 @@ const ResumeBuilder = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* Master Prompt or AI Chat Interface */}
           {showMasterPrompt ? (
             <div>
               <div className="flex justify-between items-center mb-4">
@@ -155,7 +285,6 @@ const ResumeBuilder = () => {
             </div>
           )}
 
-          {/* Resume Layouts */}
           <div className="glass-card p-6 rounded-xl">
             <h2 className="text-2xl font-semibold mb-4">ATS-Optimized Layouts</h2>
             <p className="text-muted-foreground mb-6">
@@ -169,7 +298,6 @@ const ResumeBuilder = () => {
         </div>
 
         <div className="space-y-8">
-          {/* Resume Customizer */}
           <div className="glass-card p-6 rounded-xl">
             <h2 className="text-2xl font-semibold mb-4">Customize</h2>
             <p className="text-muted-foreground mb-6">
@@ -185,10 +313,8 @@ const ResumeBuilder = () => {
             />
           </div>
 
-          {/* Resume Strength Analysis */}
           <ResumeStrength scores={strengths} />
 
-          {/* Action Buttons */}
           <div className="flex flex-col gap-3">
             <button
               onClick={analyzeResume}
@@ -216,7 +342,7 @@ const ResumeBuilder = () => {
               <span>Download Resume</span>
             </button>
             
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border hover:bg-secondary transition-colors">
+            <button onClick={shareResume} className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border hover:bg-secondary transition-colors">
               <Share2 size={20} />
               <span>Share Resume</span>
             </button>

@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Check } from "lucide-react";
 
 type Layout = {
@@ -47,7 +46,11 @@ const ResumeLayouts: React.FC<ResumeLayoutsProps> = ({ selectedLayout, onSelectL
       {layouts.map((layout) => (
         <div
           key={layout.id}
-          className={`layout-card ${selectedLayout === layout.id ? "active" : ""}`}
+          className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+            selectedLayout === layout.id 
+              ? "border-primary bg-primary/5 shadow-sm" 
+              : "border-border hover:border-primary/50"
+          }`}
           onClick={() => onSelectLayout(layout.id)}
         >
           <div className="flex justify-between items-start mb-2">

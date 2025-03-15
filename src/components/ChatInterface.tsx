@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { getGeminiResponse, preprocessGeminiResponse } from "@/lib/gemini";
@@ -38,6 +37,7 @@ const ChatInterface = () => {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
